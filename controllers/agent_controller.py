@@ -48,7 +48,7 @@ class AgentController:
             ('human', '{input}')
         ])
     
-    async def process_entries(self, rows: List[List[str]]) -> List[Dict[str, Any]]:
+    async def convert_to_json(self, rows: List[List[str]]) -> List[Dict[str, Any]]:
         main_prompt = self.create_main_prompt()
         
         chain = main_prompt | self.model
