@@ -1,11 +1,11 @@
+from langchain_groq import ChatGroq
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from controllers.agent_controller import AgentController
 from services.files_service import FilesService
 from config.database import get_db
-from typing import List
-import os
+
 
 app = FastAPI()
 
@@ -18,10 +18,14 @@ async def process_file(
         if not file.filename.endswith((".csv", ".xlsx", ".xls")):
             raise HTTPException(400, "File must be csv, xlsx, or xls")
         
-        content = file.read()
-
+        content = await file.read()
+        model = ChatGroq(
+            model="llama-3.2-11b-vision-preview",
+            temperature=0.0,
+            max_retries=2
+        )
         files_service = FilesService()
-        agent_controller = AgentController(files_service, db)
+        agent_controller = AgentController(model, files_service, db)
 
         rows = files_service.parse_file(file.filename, content)
         results = await agent_controller.convert_to_json(rows)
