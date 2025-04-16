@@ -2,7 +2,7 @@ from langchain_groq import ChatGroq
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from controllers.agent_controller import AgentController
+from utils.link_card_parser import LinkCardParser
 from services.files_service import FilesService
 from config.database import get_db
 
@@ -20,15 +20,15 @@ async def process_file(
         
         content = await file.read()
         model = ChatGroq(
-            model="llama-3.2-11b-vision-preview",
+            model="llama-3.3-70b-versatile",
             temperature=0.0,
-            max_retries=2
+            max_retries=2,
         )
         files_service = FilesService()
-        agent_controller = AgentController(model, files_service, db)
+        parser = LinkCardParser(model, files_service, db)
 
         rows = files_service.parse_file(file.filename, content)
-        results = await agent_controller.convert_to_json(rows)
+        results = await parser.convert_to_json(rows)
 
         return {
             "filename": file.filename,

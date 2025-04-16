@@ -7,7 +7,7 @@ from sqlalchemy import text
 import ast
 
 
-class AgentController:
+class LinkCardParser:
     def __init__(self, model,  files_service: FilesService, db: Session ):
         self.model = model
         self.files_service = files_service
@@ -15,14 +15,23 @@ class AgentController:
         
     def create_examples(self) -> List[Dict[str, any]]:
         results = self.db.execute(text("SELECT input, output FROM examples"))
+        rows = results.fetchall()
 
-        return [
-            {
-                "input": json.loads(row[0]),
-                "output": json.loads(row[1])
-            }
-            for row in results
-        ] 
+        data = []
+        for i, row in enumerate(rows):  # Use enumerate to track the row index
+            try:
+                data.append({
+                    "input": json.loads(row[0]),
+                    "output": json.loads(row[1])
+                })
+            except json.JSONDecodeError as e:
+                print(f"\n🚨 JSON Decode Error at row {i}: {e}")
+                print(f"🔎 Input: {row[0]}")
+                print(f"🔎 Output: {row[1]}")
+                # Use continue to keep processing other rows
+                continue 
+
+        return data     
     
     def create_main_prompt(self) -> ChatPromptTemplate:
         examples = self.create_examples()
@@ -38,12 +47,19 @@ class AgentController:
         )
 
         return ChatPromptTemplate.from_messages([
-            ('system', """You are a data transformation assistant. 
-              the input data into the standardized JSON format. 
-             Maintain the same structure as the examples, only changing the values. 
-             do not add any keys that do not appear in the examples. 
-             there are no default values, if any key does not have a value the value will be null. 
-             Do not explain anything just return the json results in valid json response format"""),
+            ('system', """You are a precise and expert data entry assistant.
+
+            Your task is to transform user input into a structured array of JSON objects that strictly match the format and field structure demonstrated in the examples.
+
+            Instructions:
+            - Only use the fields shown in the examples. Do not add or infer new fields.
+            - Do not generate any placeholder or default values.
+            - If no suitable value exists in the input for a required field, assign it as null.
+            - Use your best judgment to map the input data to the correct fields in the output.
+            - Return only the JSON array—no explanations, no extra text.
+            - Your response must strictly follow the structure, naming, and formatting of the example outputs.
+
+            Your response will always be a raw array of JSON objects."""),
             few_shot_prompt,
             ('human', '{input}')
         ])
@@ -52,7 +68,6 @@ class AgentController:
     
     async def convert_to_json(self, rows: List[List[str]]) -> List[Dict[str, Any]]:
         main_prompt = self.create_main_prompt()
-        print("in json")
         
         chain = main_prompt | self.model
 
@@ -61,8 +76,8 @@ class AgentController:
             try:
                 input = {'input': row}
                 response = chain.invoke(input) 
-                results.append(ast.literal_eval(response.content))
-                print(results)
+                results.append(json.loads(response.content))
+                
 
             except Exception as e:
                 results.append({
