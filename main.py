@@ -1,4 +1,4 @@
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
@@ -19,10 +19,13 @@ async def process_file(
             raise HTTPException(400, "File must be csv, xlsx, or xls")
         
         content = await file.read()
-        model = ChatGroq(
-            model="llama-3.3-70b-versatile",
-            temperature=0.0,
+        model = ChatOpenAI(
+            model="gpt-4o",
+            temperature=0,
+            max_tokens=None,
+            timeout=None,
             max_retries=2,
+            # api_key="...",
         )
         files_service = FilesService()
         parser = LinkCardParser(model, files_service, db)
@@ -40,6 +43,3 @@ async def process_file(
     except Exception as e:
         print(e)
         raise HTTPException(500, "Unable to process request at this time")        
-
-       
-

@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 from sqlalchemy.orm import Session
 import json
@@ -18,17 +20,14 @@ class LinkCardParser:
         rows = results.fetchall()
 
         data = []
-        for i, row in enumerate(rows):  # Use enumerate to track the row index
+        for row in rows:  
             try:
                 data.append({
                     "input": json.loads(row[0]),
                     "output": json.loads(row[1])
                 })
             except json.JSONDecodeError as e:
-                print(f"\n🚨 JSON Decode Error at row {i}: {e}")
-                print(f"🔎 Input: {row[0]}")
-                print(f"🔎 Output: {row[1]}")
-                # Use continue to keep processing other rows
+                print(e)
                 continue 
 
         return data     
@@ -56,10 +55,10 @@ class LinkCardParser:
             - Do not generate any placeholder or default values.
             - If no suitable value exists in the input for a required field, assign it as null.
             - Use your best judgment to map the input data to the correct fields in the output.
-            - Return only the JSON array—no explanations, no extra text.
+            - Return only the JSON Objects like the output examples, no explanations, no extra text.
             - Your response must strictly follow the structure, naming, and formatting of the example outputs.
 
-            Your response will always be a raw array of JSON objects."""),
+            Your response will always be a JSON object."""),
             few_shot_prompt,
             ('human', '{input}')
         ])
@@ -76,7 +75,8 @@ class LinkCardParser:
             try:
                 input = {'input': row}
                 response = chain.invoke(input) 
-                results.append(json.loads(response.content))
+                results.append(ast.literal_eval(response.content))
+                print(results)
                 
 
             except Exception as e:
@@ -86,8 +86,6 @@ class LinkCardParser:
                 })
 
         return results
-       
-        return    
 
 
 
