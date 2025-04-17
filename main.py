@@ -34,8 +34,8 @@ async def process_file(
 
         return {
             "filename": file.filename,
-            "success_count": len(results["success"]),
-            "error_count": len(results["error"]),
+            "success_count": len([row for row in results if "error" not in row]),
+            "error_count": len([row for row in results if "error" in row]),
             "results": results
         }
     

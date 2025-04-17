@@ -70,10 +70,7 @@ class LinkCardParser:
         
         chain = main_prompt | self.model
 
-        results = {
-            "errors": [],
-            "success": []
-        }
+        results = []
         for row in rows:
             try:
                 input = {'input': row}
@@ -82,10 +79,10 @@ class LinkCardParser:
                 if output.get("Nombre") is None or output.get("Telefono") is None:
                     raise ValueError("Nombre y Teléfono son campos obligatorios.")
 
-                results["success"].append(output)        
+                results.append(output)        
 
             except Exception as e:
-                results["errors"].append({
+                results.append({
                     "error": str(e),
                     "input": row
                 })
