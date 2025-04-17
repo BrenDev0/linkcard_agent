@@ -75,7 +75,9 @@ class LinkCardParser:
             try:
                 input = {'input': row}
                 response = chain.invoke(input) 
-                results.append(ast.literal_eval(response.content))
+                output = ast.literal_eval(response.content)
+                if output.get("Nombre") is not None and output.get("Telefono") is not None:
+                    results.append(output)
 
             except Exception as e:
                 results.append({
