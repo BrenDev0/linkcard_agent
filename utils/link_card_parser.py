@@ -48,7 +48,7 @@ class LinkCardParser:
         return ChatPromptTemplate.from_messages([
             ('system', """You are a precise and expert data entry assistant.
 
-            Your task is to transform user input into a structured array of JSON objects that strictly match the format and field structure demonstrated in the examples.
+            Your task is to transform user input into a structured JSON objects that strictly match the format and field structure demonstrated in the examples.
 
             Instructions:
             - Only use the fields shown in the examples. Do not add or infer new fields.
@@ -76,8 +76,6 @@ class LinkCardParser:
                 input = {'input': row}
                 response = chain.invoke(input) 
                 results.append(ast.literal_eval(response.content))
-                print(results)
-                
 
             except Exception as e:
                 results.append({

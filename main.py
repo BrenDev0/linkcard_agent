@@ -9,7 +9,7 @@ from config.database import get_db
 
 app = FastAPI()
 
-@app.post("/process", response_class=JSONResponse)
+@app.post("/create", response_class=JSONResponse)
 async def process_file(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
@@ -24,8 +24,7 @@ async def process_file(
             temperature=0,
             max_tokens=None,
             timeout=None,
-            max_retries=2,
-            # api_key="...",
+            max_retries=2
         )
         files_service = FilesService()
         parser = LinkCardParser(model, files_service, db)
