@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
+from fastapi import WebSocket
 from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 from sqlalchemy.orm import Session
 import json
@@ -10,10 +11,10 @@ import ast
 
 
 class LinkCardParser:
-    def __init__(self, model,  files_service: FilesService, db: Session ):
+    def __init__(self, model, db: Session, websocket: WebSocket ):
         self.model = model
-        self.files_service = files_service
         self.db = db
+        self.websocket = websocket
         
     def create_examples(self) -> List[Dict[str, any]]:
         results = self.db.execute(text("SELECT input, output FROM examples"))
@@ -79,7 +80,12 @@ class LinkCardParser:
                 if output.get("Nombre") is None or output.get("Telefono") is None:
                     raise ValueError("Nombre y Teléfono son campos obligatorios.")
 
-                results.append(output)        
+                results.append(output)  
+
+                if self.websocket:
+                    await self.websocket.send_json(output)
+                else:
+                    print("No websocket connected.")          
 
             except Exception as e:
                 results.append({
