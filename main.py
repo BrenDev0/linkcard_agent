@@ -1,5 +1,5 @@
 from langchain_openai import ChatOpenAI
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, WebSocket
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from utils.link_card_parser import LinkCardParser
@@ -12,10 +12,9 @@ app = FastAPI()
 active_connections = {}
 websocketService = WebsocketService(active_connections)
 
-
-@app.post("/create", response_class=JSONResponse)
+@app.post("/api/parse-file", response_class=JSONResponse)
 async def process_file(
-    connection_id = str,
+    connection_id: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
@@ -31,11 +30,16 @@ async def process_file(
             timeout=None,
             max_retries=2
         )
-        files_service = FilesService()
-        websocket = websocketService.get_connection(connection_id)
-        parser = LinkCardParser(model, db, websocket)
 
-        rows = files_service.parse_file(file.filename, content)
+        websocket = websocketService.get_connection(connection_id)
+
+        if websocket is None:
+            raise HTTPException(status_code=404, detail="Websocket connection not found.")
+        
+        parser = LinkCardParser(model=model, db=db, websocket=websocket)
+
+        files_service = FilesService()
+        rows = files_service.parse_file(filename=file.filename, content=content)
         results = await parser.convert_to_json(rows)
 
         return {
@@ -47,11 +51,19 @@ async def process_file(
     
     except Exception as e:
         print(e)
-        raise HTTPException(500, "Unable to process request at this time") 
+        raise HTTPException(status_code=500, detail="Unable to process request at this time") 
     
 
 @app.websocket("/ws/{connection_id}")
 async def websocket_endpoint(websocket: WebSocket, connection_id: str):
-    await websocket.accept()   
+    await websocket.accept()
+    websocketService.add_connection(connection_id, websocket)
+    print(f'Websocket connection: {connection_id} opened.')
+    try:
+        while True: 
+            await websocket.receive_text()
 
+    except WebSocketDisconnect:
+        websocketService.close_connection(connection_id)
+        print(f'Websocket connection: {connection_id} closed.')
 
