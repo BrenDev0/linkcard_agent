@@ -79,6 +79,9 @@ class LinkCardParser:
                 output = ast.literal_eval(response.content)
                 if output.get("Nombre") is None or output.get("Telefono") is None:
                     raise ValueError("Nombre y Teléfono son campos obligatorios.")
+                
+                if (output.get("Nombre") in [None, "Nombre", "nombre", "name", "Name"]):
+                    raise ValueError("Expected row with data but recieved header") 
 
                 results.append(output)  
 
