@@ -29,15 +29,12 @@ websocketService = WebsocketService(active_connections)
 
 @app.post("/api/parse-file", response_class=JSONResponse)
 async def process_file(
-    request: Request,
+
     connection_id: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     
 ):
-    
-    body = await request.body()
-    print(f"Body: {body.decode('utf-8')}") 
     try:
         if not file.filename.endswith((".csv", ".xlsx", ".xls")):
             raise HTTPException(400, "File must be csv, xlsx, or xls")
