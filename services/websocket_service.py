@@ -6,6 +6,7 @@ class WebsocketService:
 
     def add_connection(self, connection_id:str, websocket: WebSocket):
         self.active_connections[connection_id] = websocket
+        print(f"connection {connection_id} added.")
         return
     
     def get_connection(self, connection_id: str) -> WebSocket:
