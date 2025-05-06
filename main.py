@@ -1,5 +1,5 @@
 from langchain_openai import ChatOpenAI
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -18,10 +18,10 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allow all origins
+    allow_origins=origins, 
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],  
+    allow_headers=["*"], 
 )
 
 active_connections = {}
@@ -29,10 +29,15 @@ websocketService = WebsocketService(active_connections)
 
 @app.post("/api/parse-file", response_class=JSONResponse)
 async def process_file(
+    request: Request,
     connection_id: str = Form(...),
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    
 ):
+    
+    body = await request.body()
+    print(f"Body: {body.decode('utf-8')}") 
     try:
         if not file.filename.endswith((".csv", ".xlsx", ".xls")):
             raise HTTPException(400, "File must be csv, xlsx, or xls")
