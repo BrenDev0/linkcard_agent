@@ -1,6 +1,7 @@
 from langchain_openai import ChatOpenAI
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from utils.link_card_parser import LinkCardParser
 from services.files_service import FilesService
@@ -9,6 +10,20 @@ from services.websocket_service import WebsocketService
 
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000"
+    
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
 active_connections = {}
 websocketService = WebsocketService(active_connections)
 
