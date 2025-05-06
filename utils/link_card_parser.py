@@ -78,9 +78,21 @@ class LinkCardParser:
                 response = await chain.ainvoke(input) 
                 output = ast.literal_eval(response.content)
                 if output.get("Nombre") is None or output.get("Telefono") is None:
+                    if self.websocket:
+                         await self.websocket.send_json({
+                            "error": str(e),
+                            "input": row
+                        })
+                    
                     raise ValueError("Nombre y Teléfono son campos obligatorios.")
                 
                 if (output.get("Nombre") in [None, "Nombre", "nombre", "name", "Name"]):
+                    if self.websocket:
+                        await self.websocket.send_json({
+                            "error": str(e),
+                            "input": row
+                        })
+                    
                     raise ValueError("Expected row with data but recieved header") 
 
                 results.append(output)  
