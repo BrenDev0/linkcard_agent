@@ -88,8 +88,8 @@ class LinkCardParser:
                 results.append(output)  
 
                 if self.websocket:
-                    await self.websocket.send_json({
-                        "response": output,
+                    await self.websocket.send_json(output)
+                    await self.websocket.send({
                         "tokenUsage": response.usage_metadata
                     })
                 else:
