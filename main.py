@@ -69,7 +69,7 @@ async def process_file(
     
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail=f"Unable to process request at this time: {e}") 
+        raise HTTPException(status_code=500, detail=f"Unable to process request at this time.") 
     
 
 @app.websocket("/ws/{connection_id}")
