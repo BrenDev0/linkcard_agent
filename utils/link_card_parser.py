@@ -80,7 +80,7 @@ class LinkCardParser:
                 if output.get("Nombre") is None or output.get("Telefono") is None:
                     if self.websocket:
                          await self.websocket.send_json({
-                            "error": str(e),
+                            "error": e,
                             "input": row
                         })
                     
@@ -89,7 +89,7 @@ class LinkCardParser:
                 if (output.get("Nombre") in [None, "Nombre", "nombre", "name", "Name"]):
                     if self.websocket:
                         await self.websocket.send_json({
-                            "error": str(e),
+                            "error": e,
                             "input": row
                         })
                     
