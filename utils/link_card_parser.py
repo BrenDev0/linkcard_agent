@@ -78,20 +78,10 @@ class LinkCardParser:
                 response = await chain.ainvoke(input) 
                 output = ast.literal_eval(response.content)
                 if output.get("Nombre") is None or output.get("Telefono") is None:
-                    if self.websocket:
-                         await self.websocket.send_json({
-                            "error": e,
-                            "input": row
-                        })
                     
                     raise ValueError("Nombre y Teléfono son campos obligatorios.")
                 
                 if (output.get("Nombre") in [None, "Nombre", "nombre", "name", "Name"]):
-                    if self.websocket:
-                        await self.websocket.send_json({
-                            "error": e,
-                            "input": row
-                        })
                     
                     raise ValueError("Expected row with data but recieved header") 
 
@@ -103,10 +93,16 @@ class LinkCardParser:
                     print("No websocket connected.")          
 
             except Exception as e:
-                results.append({
+                error_payload = {
                     "error": str(e),
                     "input": row
-                })
+                }
+                results.append(error_payload)
+
+                if self.websocket:
+                    await self.websocket.send_json(error_payload)
+                else:
+                    print("No websocket connected.") 
 
         return results
 
