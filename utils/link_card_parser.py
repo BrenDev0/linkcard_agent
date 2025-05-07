@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 load_dotenv()
-from langchain.callbacks import get_openai_callback
 from fastapi import WebSocket
 from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 from sqlalchemy.orm import Session
@@ -76,12 +75,8 @@ class LinkCardParser:
         for row in rows:
             try:
                 input = {'input': row}
-
-                async with get_openai_callback() as cb:
-                    response = await chain.ainvoke(input) 
-                
+                response = await chain.ainvoke(input) 
                 output = ast.literal_eval(response.content)
-                
                 if output.get("Nombre") is None or output.get("Telefono") is None:
                     
                     raise ValueError("Nombre y Teléfono son campos obligatorios.")
@@ -94,13 +89,11 @@ class LinkCardParser:
 
                 if self.websocket:
                     await self.websocket.send_json({
-                        "data": output,
-                        "tokens_used": cb.total_tokens,
-                        "prompt_tokens": cb.prompt_tokens,
-                        "completion_tokens": cb.completion_tokens
+                        "response": output,
+                        "tokenUsage": response.usage_metadata
                     })
                 else:
-                    print("No websocket connected.")         
+                    print("No websocket connected.")          
 
             except Exception as e:
                 error_payload = {
