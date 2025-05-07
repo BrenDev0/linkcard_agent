@@ -100,9 +100,14 @@ class LinkCardParser:
                 results.append(error_payload)
 
                 if self.websocket:
-                    await self.websocket.send_json(error_payload)
+                    try:
+                        await self.websocket.send_json(error_payload)
+                    except RuntimeError as ws_err:
+                        print(f"WebSocket already closed: {ws_err}")
+                    except Exception as unexpected:
+                        print(f"Unexpected WebSocket error: {unexpected}")
                 else:
-                    print("No websocket connected.") 
+                    print("No websocket connected for error reporting.")
 
         return results
 
