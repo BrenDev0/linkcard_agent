@@ -12,8 +12,8 @@ from services.websocket_service import WebsocketService
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000"
-    
+    "http://localhost:3000",
+    "https://smart-cards-dups8l0ky-soul-lens.vercel.app/"
 ]
 
 app.add_middleware(
