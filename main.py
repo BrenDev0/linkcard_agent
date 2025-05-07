@@ -13,7 +13,8 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
-    "https://smart-cards-dups8l0ky-soul-lens.vercel.app/"
+    "https://smart-cards-dups8l0ky-soul-lens.vercel.app/",
+    "https://smart-cards-mu.vercel.app"
 ]
 
 app.add_middleware(
