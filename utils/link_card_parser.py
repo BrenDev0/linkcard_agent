@@ -89,9 +89,7 @@ class LinkCardParser:
 
                 if self.websocket:
                     await self.websocket.send_json(output)
-                    await self.websocket.send({
-                        "tokenUsage": response.usage_metadata
-                    })
+        
                 else:
                     print("No websocket connected.")          
 
@@ -100,6 +98,7 @@ class LinkCardParser:
                     "error": str(e),
                     "input": row
                 }
+
                 results.append(error_payload)
 
                 if self.websocket:
