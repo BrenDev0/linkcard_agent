@@ -75,8 +75,22 @@ class LinkCardParser:
         for row in rows:
             try:
                 input = {'input': row}
-                response = await chain.ainvoke(input) 
-                output = json.loads(response.content)
+                response = await chain.ainvoke(input)
+                raw_response = response.content
+                print("RAW MODEL OUTPUT:", raw_response)
+
+                # Safely parse the response
+                if isinstance(raw_response, dict):
+                    output = raw_response
+                elif isinstance(raw_response, str):
+                    try:
+                        output = json.loads(raw_response)
+                    except json.JSONDecodeError:
+                        output = ast.literal_eval(raw_response)
+                        if not isinstance(output, dict):
+                            raise ValueError("Parsed output is not a dict.")
+                else:
+                    raise ValueError(f"Unsupported response type: {type(raw_response)}")
                 if output.get("name") is None or output.get("phone") is None:
                     print(output)
                     raise ValueError("Nombre y Teléfono son campos obligatorios.")
