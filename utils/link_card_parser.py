@@ -76,7 +76,7 @@ class LinkCardParser:
             try:
                 input = {'input': row}
                 response = await chain.ainvoke(input) 
-                output = response.content
+                output = ast.literal_eval(response.content)
                 if output.get("name") is None or output.get("phone") is None:
                     print(output)
                     raise ValueError("Nombre y Teléfono son campos obligatorios.")
