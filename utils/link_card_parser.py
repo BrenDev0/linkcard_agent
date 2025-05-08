@@ -77,11 +77,11 @@ class LinkCardParser:
                 input = {'input': row}
                 response = await chain.ainvoke(input) 
                 output = ast.literal_eval(response.content)
-                if output.get("Nombre") is None or output.get("Telefono") is None:
+                if output.get("name") is None or output.get("phone") is None:
                     
                     raise ValueError("Nombre y Teléfono son campos obligatorios.")
                 
-                if (output.get("Nombre") in [None, "Nombre", "nombre", "name", "Name"]):
+                if (output.get("name") in ["Nombre", "nombre", "name", "Name"]):
                     
                     raise ValueError("Expected row with data but recieved header") 
 
