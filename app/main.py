@@ -25,19 +25,12 @@ app.add_middleware(AuthMiddleware)
 
 app.include_router(files.router)
 
-@app.get("/test")
-async def root():
-    return {"message": "test"}
-
-
 
 @app.websocket("/ws/{connection_id}")
 async def websocket_endpoint(websocket: WebSocket, connection_id: str, token: str = Query(None)):
     await websocket.accept()
-
+    
     # auth
-    token = websocket.headers.get("Authorization")
-
     try:
         payload = verify_token(f"Bearer {token}")
         

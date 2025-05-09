@@ -26,6 +26,7 @@ def verify_token(auth_header: str):
         raise ValueError("Missing or invalid Authorization header")
 
     token = auth_header.split(" ")[1]
+    print(token)
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
