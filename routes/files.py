@@ -12,7 +12,7 @@ router = APIRouter(
     tags=["files"],
 )
 
-@router.post("/api/parse-file", response_class=JSONResponse)
+@router.post("/parse-file", response_class=JSONResponse)
 async def process_file(
     backgroundTasks: BackgroundTasks,
     connection_id: str = Form(...),

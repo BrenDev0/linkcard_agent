@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes import files
 from dependencies.websocket import websocketInstance
 from middleware.auth import AuthMiddleware
+from middleware.auth import verify_token
 
 
 app = FastAPI()
@@ -24,10 +25,30 @@ app.add_middleware(AuthMiddleware)
 
 app.include_router(files.router)
 
+@app.get("/test")
+async def root():
+    return {"message": "test"}
+
+
+
 @app.websocket("/ws/{connection_id}")
 async def websocket_endpoint(websocket: WebSocket, connection_id: str):
     await websocket.accept()
+
+    # auth
+    token = websocket.headers.get("Authorization")
+
+    try:
+        payload = verify_token(token)
+        
+        print(f"WebSocket authenticated user: {payload}")
+    except ValueError as e:
+        await websocket.close(code=1008)  # Policy Violation
+        print(f"WebSocket auth failed: {e}")
+        return
+
     websocketInstance.add_connection(connection_id, websocket)
+    
     print(f'Websocket connection: {connection_id} opened.')
     try:
         while True: 
