@@ -1,8 +1,8 @@
 from fastapi import WebSocket
 
 class WebsocketService:
-    def __init__(self, active_connections: dict[str, WebSocket]):
-        self.active_connections = active_connections
+    def __init__(self):
+        self.active_connections = {}
 
     def add_connection(self, connection_id:str, websocket: WebSocket):
         self.active_connections[connection_id] = websocket

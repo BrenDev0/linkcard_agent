@@ -1,0 +1,32 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+import jwt
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+
+SECRET_KEY = os.getenv("TOKEN_KEY")
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        auth_header = request.headers.get("Authorization")
+       
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return JSONResponse(status_code=401, content={"detail": "Missing or invalid Authorization header"})
+
+        token = auth_header.split(" ")[1]
+
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+           
+            request.state.user = payload
+        except jwt.ExpiredSignatureError:
+            print("token expired")
+            return JSONResponse(status_code=401, content={"detail": "Token has expired"})
+        
+        except jwt.InvalidTokenError:
+            print("token invalid")
+            return JSONResponse(status_code=401, content={"detail": "Invalid token"})
+
+        return await call_next(request)

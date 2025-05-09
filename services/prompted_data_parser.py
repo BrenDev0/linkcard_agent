@@ -1,16 +1,13 @@
-from dotenv import load_dotenv
-load_dotenv()
 from fastapi import WebSocket
 from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 from sqlalchemy.orm import Session
 import json
 from typing import List, Dict, Any
-from services.files_service import FilesService
 from sqlalchemy import text
 import ast
 
 
-class LinkCardParser:
+class PromptedDataParser:
     def __init__(self, model, db: Session, websocket: WebSocket ):
         self.model = model
         self.db = db
