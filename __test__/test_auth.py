@@ -10,7 +10,7 @@ ALGORITHM = "HS256"
 
 def generate_token(payload: dict) -> str:
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-    print(f"TOKEN:::::: {token}")
+    
     return token
 
 def test_protected_route_with_valid_token():

@@ -24,10 +24,6 @@ app.add_middleware(AuthMiddleware)
 
 app.include_router(files.router)
 
-@app.get("/test")
-async def root():
-    return {"message": "Hello World"}
-
 @app.websocket("/ws/{connection_id}")
 async def websocket_endpoint(websocket: WebSocket, connection_id: str):
     await websocket.accept()
