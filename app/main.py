@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from routes import files
 from dependencies.websocket import websocketInstance
@@ -32,14 +32,14 @@ async def root():
 
 
 @app.websocket("/ws/{connection_id}")
-async def websocket_endpoint(websocket: WebSocket, connection_id: str):
+async def websocket_endpoint(websocket: WebSocket, connection_id: str, token: str = Query(None)):
     await websocket.accept()
 
     # auth
     token = websocket.headers.get("Authorization")
 
     try:
-        payload = verify_token(token)
+        payload = verify_token(f"Bearer {token}")
         
         print(f"WebSocket authenticated user: {payload}")
     except ValueError as e:
