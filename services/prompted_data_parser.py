@@ -68,7 +68,6 @@ class PromptedDataParser:
         
         chain = main_prompt | self.model
 
-        results = []
         for row in rows:
             try:
                 input = {'input': row}
@@ -82,7 +81,6 @@ class PromptedDataParser:
                     print(output)
                     raise ValueError("Expected row with data but recieved header") 
 
-                results.append(output)  
 
                 if self.websocket:
                     await self.websocket.send_json(output)
@@ -96,8 +94,6 @@ class PromptedDataParser:
                     "input": row
                 }
 
-                results.append(error_payload)
-
                 if self.websocket:
                     try:
                         await self.websocket.send_json(error_payload)
@@ -108,7 +104,9 @@ class PromptedDataParser:
                 else:
                     print("No websocket connected for error reporting.")
 
-        return results
+        if self.websocket:
+            await self.websocket.send_text("close");
+        return;
 
 
 
