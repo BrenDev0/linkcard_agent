@@ -105,7 +105,7 @@ class PromptedDataParser:
                     print("No websocket connected for error reporting.")
 
         if self.websocket:
-            await self.websocket.send_text("close");
+            await self.websocket.send_json({ "closeConnection": True });
         return;
 
 
