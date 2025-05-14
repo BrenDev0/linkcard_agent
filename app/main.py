@@ -27,19 +27,17 @@ app.include_router(files.router)
 
 
 @app.websocket("/ws/{connection_id}")
-async def websocket_endpoint(websocket: WebSocket, connection_id: str, token: str = Query(None)):
-    await websocket.accept()
-    
+async def websocket_endpoint(websocket: WebSocket, connection_id: str, token: str = Query(None)):   
     # auth
     try:
         payload = verify_token(f"Bearer {token}")
         
         print(f"WebSocket authenticated user: {payload}")
     except ValueError as e:
-        await websocket.close(code=1008)  # Policy Violation
         print(f"WebSocket auth failed: {e}")
         return
 
+    await websocket.accept()
     websocketInstance.add_connection(connection_id, websocket)
     
     print(f'Websocket connection: {connection_id} opened.')
