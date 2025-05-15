@@ -46,6 +46,6 @@ async def websocket_endpoint(websocket: WebSocket, connection_id: str, token: st
             await websocket.receive_text()
 
     except WebSocketDisconnect:
-        await websocketInstance.close_connection(connection_id)
+        websocketInstance.remove_connection(connection_id)
         print(f'Websocket connection: {connection_id} closed.')
 

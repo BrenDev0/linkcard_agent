@@ -43,6 +43,7 @@ async def process_file(
         rows = files_service.parse_file(filename=file.filename, content=content)
         
         backgroundTasks.add_task(parser.convert_to_json, rows)
+        backgroundTasks.add_task(websocketInstance.remove_connection, connection_id)
 
         return JSONResponse(status_code=200, content={"message": "File parsing in progress."});
     

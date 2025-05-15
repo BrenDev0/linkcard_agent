@@ -17,18 +17,7 @@ class WebsocketService:
 
         return connection
 
-    async def close_connection(self, connection_id: str):
-        if connection_id in self.active_connections:
-            try:
-                websocket = self.active_connections[connection_id]
-                await websocket.close() 
-                del self.active_connections[connection_id]  
-                print(f'Connection: {connection_id} closed.')
-                return
-            except Exception as e:
-                print(f"Error while closing connection {connection_id}: {e}")
-                return
-        else:
-            print(f"Connection {connection_id} not found.")
-            return
+    def remove_connection(self, connection_id: str):
+        self.active_connections.pop(connection_id, None)
+        print(f'Connection: {connection_id} was removed.')
         
