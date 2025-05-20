@@ -2,39 +2,37 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 import jwt
-from fastapi import Request
-from fastapi.responses import JSONResponse
-from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi import Request, HTTPException
 
-SECRET_KEY = os.getenv("TOKEN_KEY")
 
-class AuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
+class AuthMiddleware:
+    def __init__(self):
+        self.SECRET_KEY = os.getenv("TOKEN_KEY")
+
+    def get_auth_header(self, request: Request):
         auth_header = request.headers.get("Authorization")
 
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise ValueError("Missing or invalid Authorization header")
+        
+        return auth_header
+    
+
+    def verify_token(self, request: Request):
         try:
-            payload = verify_token(auth_header=auth_header)
-            request.state.user = payload
+            auth_header = self.get_auth_header(request)
+            token = auth_header.split(" ")[1]
+            print(token)
+            payload = jwt.decode(token, self.SECRET_KEY, algorithms=["HS256"])
+            return payload
+        
+        except jwt.ExpiredSignatureError:
+            print("token expired")
+            raise HTTPException(status_code=403, detail="Expired Token")
+        
+        except jwt.InvalidTokenError:
+            print("token invalid")
+            raise HTTPException(status_code=401, detail="Invlalid token")
+        
         except ValueError as e:
-            return JSONResponse(status_code=401, content={"detail": str(e)})
-
-        return await call_next(request)
-    
-
-def verify_token(auth_header: str):
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise ValueError("Missing or invalid Authorization header")
-
-    token = auth_header.split(" ")[1]
-    print(token)
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        return payload
-    except jwt.ExpiredSignatureError:
-        print("token expired")
-        raise ValueError("Token has expired")
-    
-    except jwt.InvalidTokenError:
-        print("token invalid")
-        raise ValueError("Invalid token")
+            raise HTTPException(status_code=401, detail=str(e))
