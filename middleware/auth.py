@@ -18,21 +18,26 @@ class AuthMiddleware:
         return auth_header
     
 
-    def verify_token(self, request: Request):
-        try:
-            auth_header = self.get_auth_header(request)
+def verify_token(self, request_or_token):
+    try:
+        if isinstance(request_or_token, Request):
+            auth_header = self.get_auth_header(request_or_token)
             token = auth_header.split(" ")[1]
-            print(token)
-            payload = jwt.decode(token, self.SECRET_KEY, algorithms=["HS256"])
-            return payload
-        
-        except jwt.ExpiredSignatureError:
-            print("token expired")
-            raise HTTPException(status_code=403, detail="Expired Token")
-        
-        except jwt.InvalidTokenError:
-            print("token invalid")
-            raise HTTPException(status_code=401, detail="Invlalid token")
-        
-        except ValueError as e:
-            raise HTTPException(status_code=401, detail=str(e))
+        elif isinstance(request_or_token, str):
+            if not request_or_token.startswith("Bearer "):
+                raise ValueError("Token must start with 'Bearer '")
+            token = request_or_token.split(" ")[1]
+        else:
+            raise ValueError("Invalid input type for verify_token")
+
+        payload = jwt.decode(token, self.SECRET_KEY, algorithms=["HS256"])
+        return payload
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=403, detail="Expired Token")
+
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid Token")
+
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
