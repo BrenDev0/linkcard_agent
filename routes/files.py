@@ -15,12 +15,13 @@ router = APIRouter(
     tags=["files"],
 )
 auth = AuthMiddleware()
-@router.post("/parse-file", dependencies=[Depends(auth.verify_token)], response_class=JSONResponse)
+@router.post("/parse-file", response_class=JSONResponse)
 async def process_file(
     backgroundTasks: BackgroundTasks,
     connection_id: str = Form(...),
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: None = Depends(auth.verify_token)
 ):
     try:
         if not file.filename.endswith((".csv", ".xlsx", ".xls")):
