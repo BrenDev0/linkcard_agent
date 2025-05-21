@@ -21,7 +21,7 @@ async def process_file(
     connection_id: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    _: None = Depends(auth.verify_token)
+    _: None = Depends(auth.verify_request)
 ):
     try:
         if not file.filename.endswith((".csv", ".xlsx", ".xls")):
