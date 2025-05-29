@@ -52,12 +52,12 @@ class PromptedDataParser:
             - Only use the fields shown in the examples. Do not add or infer new fields.
             - Do not generate any placeholder or default values.
             - If no suitable value exists in the input for a required field, assign it as null.
-            - If no fileds match then simply return false.
+            - If none of the fields in the input match the expected structure, return false.
             - Use your best judgment to map the input data to the correct fields in the output.
             - Return only the JSON Objects like the output examples, no explanations, no extra text.
             - Your response must strictly follow the structure, naming, and formatting of the example outputs.
 
-            Your response will always be a JSON object."""),
+            Your response will always be either a JSON object or the literal value false."""),
             few_shot_prompt,
             ('human', '{input}')
         ])
