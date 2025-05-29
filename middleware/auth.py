@@ -16,25 +16,25 @@ class AuthMiddleware:
             raise ValueError("Missing or invalid Authorization header")
 
         token = auth_header.split(" ")[1]
-        verify_token(token)
+        self.verify_token(token)
         
         return 
     
 
-def verify_token(token):
-    try:
-        secret = os.getenv("TOKEN_KEY")
-        print(secret)
-        payload = jwt.decode(token, secret, algorithms=["HS256"])
-        return payload
-    
-    except jwt.ExpiredSignatureError:
-        print("token expired")
-        raise HTTPException(status_code=403, detail="Expired Token")
-    
-    except jwt.InvalidTokenError:
-        print("token invalid")
-        raise HTTPException(status_code=401, detail="Invlalid token")
-    
-    except ValueError as e:
-        raise HTTPException(status_code=401, detail=str(e))
+    def verify_token(self, token):
+        try:
+            secret = os.getenv("TOKEN_KEY")
+            print(secret)
+            payload = jwt.decode(token, secret, algorithms=["HS256"])
+            return payload
+        
+        except jwt.ExpiredSignatureError:
+            print("token expired")
+            raise HTTPException(status_code=403, detail="Expired Token")
+        
+        except jwt.InvalidTokenError:
+            print("token invalid")
+            raise HTTPException(status_code=401, detail="Invlalid token")
+        
+        except ValueError as e:
+            raise HTTPException(status_code=401, detail=str(e))

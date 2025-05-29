@@ -2,7 +2,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from routes import files
 from dependencies.websocket import websocketInstance
-from middleware.auth import verify_token
+from middleware.auth import AuthMiddleware
 
 
 
@@ -21,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
+auth = AuthMiddleware()
 
 app.include_router(files.router)
 
@@ -29,7 +30,7 @@ app.include_router(files.router)
 async def websocket_endpoint(websocket: WebSocket, connection_id: str, token: str = Query(None)):   
     # auth
     try:
-        payload = verify_token(token)
+        payload = auth.verify_token(token)
         
         print(f"WebSocket authenticated user: {payload}")
     except ValueError as e:
