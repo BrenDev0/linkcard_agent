@@ -19,7 +19,6 @@ class PromptedDataParser:
 
         data = []
         for row in rows: 
-            print("row from  db::::::::::::::", row) 
             try:
                 data.append({
                     "input": json.loads(row[0]),
@@ -53,6 +52,7 @@ class PromptedDataParser:
             - Only use the fields shown in the examples. Do not add or infer new fields.
             - Do not generate any placeholder or default values.
             - If no suitable value exists in the input for a required field, assign it as null.
+            - If no fileds match then simply return false.
             - Use your best judgment to map the input data to the correct fields in the output.
             - Return only the JSON Objects like the output examples, no explanations, no extra text.
             - Your response must strictly follow the structure, naming, and formatting of the example outputs.
@@ -70,7 +70,6 @@ class PromptedDataParser:
         chain = main_prompt | self.model
 
         for row in rows:
-            print("row to agent::::::::::::::::::::", row)
             try:
                 input = {'input': row}
                 response = await chain.ainvoke(input) 
