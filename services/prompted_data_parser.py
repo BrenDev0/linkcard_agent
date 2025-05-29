@@ -68,8 +68,11 @@ class PromptedDataParser:
         main_prompt = self.create_main_prompt()
         
         chain = main_prompt | self.model
+        websocket_closed = False
 
         for row in rows:
+            if websocket_closed:
+                break
             try:
                 input = {'input': row}
                 response = await chain.ainvoke(input) 
