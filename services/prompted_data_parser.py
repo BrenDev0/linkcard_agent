@@ -85,7 +85,8 @@ class PromptedDataParser:
                     await self.websocket.send_json(output)
         
                 else:
-                    print("No websocket connected.")          
+                    print("No websocket connected.") 
+                    break         
 
             except Exception as e:
                 error_payload = {
@@ -98,8 +99,10 @@ class PromptedDataParser:
                         await self.websocket.send_json(error_payload)
                     except RuntimeError as ws_err:
                         print(f"WebSocket already closed: {ws_err}")
+                        break
                     except Exception as unexpected:
                         print(f"Unexpected WebSocket error: {unexpected}")
+                        break
                 else:
                     print("No websocket connected for error reporting.")
 
