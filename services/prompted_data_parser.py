@@ -82,7 +82,16 @@ class PromptedDataParser:
 
 
                 if self.websocket:
-                    await self.websocket.send_json(output)
+                    try:
+                        await self.websocket.send_json(output)
+                    except RuntimeError as ws_err:
+                        print(f"WebSocket already closed during output send: {ws_err}")
+                        websocket_closed = True
+                        break
+                    except Exception as unexpected:
+                        print(f"Unexpected WebSocket error: {unexpected}")
+                        websocket_closed = True
+                        break
         
                 else:
                     print("No websocket connected.") 
@@ -94,20 +103,27 @@ class PromptedDataParser:
                     "input": row
                 }
 
-                if self.websocket:
+                if self.websocket and not websocket_closed:
                     try:
                         await self.websocket.send_json(error_payload)
                     except RuntimeError as ws_err:
-                        print(f"WebSocket already closed: {ws_err}")
+                        print(f"WebSocket already closed during error send: {ws_err}")
+                        websocket_closed = True
                         break
                     except Exception as unexpected:
                         print(f"Unexpected WebSocket error: {unexpected}")
+                        websocket_closed = True
                         break
                 else:
                     print("No websocket connected for error reporting.")
+                    websocket_closed = True
+                    break
 
-        if self.websocket:
-            await self.websocket.send_json({ "closeConnection": True });
+        if self.websocket and not websocket_closed:
+            try:
+                await self.websocket.send_json({"closeConnection": True})
+            except Exception as final_err:
+                print(f"Error sending closeConnection: {final_err}")
         return;
 
 
