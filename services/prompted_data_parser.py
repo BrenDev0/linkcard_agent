@@ -18,7 +18,8 @@ class PromptedDataParser:
         rows = results.fetchall()
 
         data = []
-        for row in rows:  
+        for row in rows: 
+            print("row from  db::::::::::::::", row) 
             try:
                 data.append({
                     "input": json.loads(row[0]),
@@ -69,6 +70,7 @@ class PromptedDataParser:
         chain = main_prompt | self.model
 
         for row in rows:
+            print("row to agent::::::::::::::::::::", row)
             try:
                 input = {'input': row}
                 response = await chain.ainvoke(input) 
