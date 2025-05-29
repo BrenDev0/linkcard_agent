@@ -10,4 +10,5 @@ redis==5.2.1
 SQLAlchemy==2.0.41
 uvicorn[standard]
 python-multipart
+openpyxl
 
